@@ -1,0 +1,4 @@
+localhost ansible_become=true
+
+[vpn-server]
+localhost

@@ -1,0 +1,25 @@
+---
+server_name: localhost
+server_port: 1494
+protocol: udp
+# Valid values: tun, tap
+dev_type: tun
+# If False, ta.key won't be included
+use_tls_auth: True
+# Public address to bind. Can be specified if needed to bind to exact intervace
+# address_to_bind: 127.0.0.1
+vpn_network: 10.10.0.0
+vpn_netmask: 255.255.255.0
+vpn_cidr: 24
+dns_pushes:
+  - 8.8.8.8
+  - 8.8.4.4
+ping: 5
+ping_restart: 30
+syslog_name: openvpn
+additional_pushes:
+  - "redirect-gateway def1"
+admin_email: admin@localhost
+# What to do with given client name. Valid values: issue, revoke
+keys_action: issue
+iptables_configure: True

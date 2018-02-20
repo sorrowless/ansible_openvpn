@@ -1,0 +1,5 @@
+---
+- name: VPN | Revoke keys | Revoke {{ item }} certificate
+  shell: ". ./vars ; ./revoke-full {{ item }}"
+  with_items: "{{ clients }}"
+  ignore_errors: yes

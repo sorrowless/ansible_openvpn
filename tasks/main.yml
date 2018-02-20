@@ -1,0 +1,84 @@
+---
+- name: VPN | Installation | Install needed packages
+  package:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - easy-rsa
+    - openvpn
+    - iptables-persistent
+
+- name: VPN | Configuration | Copy config files
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - { src: 'openvpn.conf', dest: '/etc/openvpn/openvpn.conf' }
+  notify:
+    - Restart OpenVPN
+
+- name: VPN | Configuration | Copy easy-rsa scripts
+  shell: "rsync -avi /usr/share/easy-rsa /etc/openvpn"
+
+- name: VPN | Configuration | Create easy-rsa vars
+  template:
+    src: easy_rsa_vars
+    dest: /etc/openvpn/easy-rsa/vars
+
+- name: VPN | Configuration | Create keys dir
+  file:
+    path: /etc/openvpn/easy-rsa/keys
+    state: directory
+
+- name: VPN | Configuration | Allow IP forwarding for IPv4
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: 1
+    sysctl_set: yes
+    reload: yes
+
+- name: VPN | Configuration | Allow iptables input port
+  iptables:
+    table: filter
+    chain: INPUT
+    protocol: "{{ protocol }}"
+    destination_port: "{{ server_port }}"
+    jump: ACCEPT
+  become: yes
+  when: iptables_configure == True
+  tags:
+    - iptables
+
+- name: VPN | Configuration | Allow iptables postrouting
+  iptables:
+    table: nat
+    chain: POSTROUTING
+    source: "{{ vpn_network }}/{{ vpn_cidr }}"
+    jump: MASQUERADE
+  become: yes
+  when: iptables_configure == True
+  tags:
+    - iptables
+
+- name: VPN | Configuration | Save iptables rules
+  shell: "iptables-save > /etc/iptables/rules.v4"
+  when: iptables_configure == True
+  tags:
+    - iptables
+
+- name: VPN | Keys creation | Generate server keys
+  include_tasks: setup_server_keys.yml
+  tags:
+    - server_keys
+
+- name: VPN | Keys creation | Generate client keys
+  include_tasks: setup_client_keys.yml
+  tags:
+    - client_keys
+  when: keys_action == 'issue'
+
+- name: VPN | Keys revokation | Revoke client certificate
+  include_tasks: revoke_client_keys.yml
+  tags:
+    - revoke_keys
+  when: keys_action == 'revoke'
