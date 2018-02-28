@@ -23,3 +23,5 @@ admin_email: admin@localhost
 # What to do with given client name. Valid values: issue, revoke
 keys_action: issue
 iptables_configure: True
+# Default clients list is empty
+clients: []

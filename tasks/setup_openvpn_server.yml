@@ -1,0 +1,15 @@
+---
+- name: VPN | Installation | Add official OpenVPN apt key
+  apt_key:
+    url: https://swupdate.openvpn.net/repos/repo-public.gpg
+    state: present
+
+- name: VPN | Installation | Add official OpenVPN repository
+  apt_repository:
+    repo: deb http://build.openvpn.net/debian/openvpn/stable xenial main
+    state: present
+
+- name: VPN | Installation | Install latest version of OpenVPN server
+  package:
+    name: openvpn
+    state: latest

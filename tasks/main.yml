@@ -1,11 +1,13 @@
 ---
-- name: VPN | Installation | Install needed packages
+- name: VPN | Installation | Prepare OpenVPN repo and install server
+  include_tasks: setup_openvpn_server.yml
+
+- name: VPN | Installation | Install additional packages
   package:
     name: "{{ item }}"
     state: latest
   with_items:
     - easy-rsa
-    - openvpn
     - iptables-persistent
 
 - name: VPN | Configuration | Copy config files
@@ -70,6 +72,14 @@
   include_tasks: setup_server_keys.yml
   tags:
     - server_keys
+
+- name: VPN | Keys creation | Check for revokation list existance
+  stat: /etc/openvpn/easy-rsa/crl.pem
+  register: revokation_list
+
+- name: VPN | Keys creation | Initialize revokation list
+  include_tasks: initialize_revokation_list.yml
+  when: revokation_list.stat.exists == False
 
 - name: VPN | Keys creation | Generate client keys
   include_tasks: setup_client_keys.yml
