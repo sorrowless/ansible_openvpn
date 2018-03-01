@@ -39,6 +39,7 @@
     src: /etc/openvpn/easy-rsa/keys/{{ item }}
     dest: /etc/openvpn/server_keys/{{ item }}
     state: link
+    force: yes
   with_items:
     - ca.crt
     - "{{ server_name }}.crt"

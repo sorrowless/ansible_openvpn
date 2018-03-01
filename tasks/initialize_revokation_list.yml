@@ -8,5 +8,5 @@
   include_tasks: setup_client_keys.yml
 
 - name: VPN | Initialize revokation list | Revoke initial user
-  include_tasks: revoke_client_keys.ymL
+  include_tasks: revoke_client_keys.yml
 

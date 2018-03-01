@@ -74,7 +74,8 @@
     - server_keys
 
 - name: VPN | Keys creation | Check for revokation list existance
-  stat: /etc/openvpn/easy-rsa/crl.pem
+  stat:
+    path: /etc/openvpn/easy-rsa/keys/crl.pem
   register: revokation_list
 
 - name: VPN | Keys creation | Initialize revokation list
@@ -85,10 +86,10 @@
   include_tasks: setup_client_keys.yml
   tags:
     - client_keys
-  when: keys_action == 'issue'
+  when: keys_action == 'issue' and (clients | length ) > 0
 
 - name: VPN | Keys revokation | Revoke client certificate
   include_tasks: revoke_client_keys.yml
   tags:
     - revoke_keys
-  when: keys_action == 'revoke'
+  when: keys_action == 'revoke' and (clients | length ) > 0

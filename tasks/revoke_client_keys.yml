@@ -1,5 +1,11 @@
 ---
 - name: VPN | Revoke keys | Revoke {{ item }} certificate
   shell: ". ./vars ; ./revoke-full {{ item }}"
+  args:
+    chdir: /etc/openvpn/easy-rsa
   with_items: "{{ clients }}"
   ignore_errors: yes
+
+- name: VPN | Revoke keys | Reset internal clients list
+  set_fact:
+    clients: []
