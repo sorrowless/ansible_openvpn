@@ -8,14 +8,12 @@
 #
 # To install OpenVPN server and issue a client certificate (this task can also
 # be ran next times just to issue additional certificates):
-# ansible-playbook -i <inventory_file> -b vpn.yml
+# ansible-playbook -i <inventory_file> -b vpn.yml -e 'server_name=domain.name'
 #
 # To revoke client certificate:
-# ansible-playbook -i <inventory_file> -b vpn.yml -e 'keys_action=revoke'
+# ansible-playbook -i <inventory_file> -b vpn.yml -e 'server_name=domain.name
+#   keys_action=revoke'
 #
-# Be aware that certificate will be revoked but to apply that revoke, manual
-# changes needed in OpenVPN configuration file due to the way easy-rsa creates
-# the revokation list.
 - name: Install VPN server and create some client certs for it
   hosts: vpn-server
   remote_user: root
@@ -23,12 +21,6 @@
   vars_prompt:
     - name: "clients"
       prompt: "Please enter login name"
-      private: no
-    - name: "fullname"
-      prompt: "Please enter full name"
-      private: no
-    - name: "mail"
-      prompt: "Please enter email"
       private: no
   roles:
     - vpn

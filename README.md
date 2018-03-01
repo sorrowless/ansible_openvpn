@@ -13,10 +13,17 @@ Role Variables
 
 server_name - filename for target server keypair file. It can be useful in case
   you already had some OpenVPN PKI and now just want to migrate to the new
-  version
-real_server_name - hostname which clients should connect to
+  version, so if you had OpenVPN server keys named after 'some.name.[key,crt]'
+  and will set server_name var to 'some.name', your keys won't be regenerated
+  and you will continue to use old ones.
+real_server_name - hostname which clients should connect to. In case you will
+  use it, exactly that name will be shown in client ovpn file as server to
+  connect to, otherwise 'server_name' var will be used. Optional.
 additional_pushes - list of additional pushed which will be advertised for
-  clients
+  clients. Optional.
+clients - list of clients to issue certificate for. In case of first-time
+  installation it will be ignored due to way revokation list created. Next
+  times it will be used as a name of client to create certificate for.
 
 Dependencies
 ------------
@@ -34,12 +41,6 @@ Example Playbook
         - name: "clients"
           prompt: "Please enter login name"
           private: no
-        - name: "fullname"
-          prompt: "Please enter full name"
-          private: no
-        - name: "mail"
-          prompt: "Please enter email"
-          private: no
       roles:
         - vpn
 
@@ -47,7 +48,7 @@ Example Playbook
 License
 -------
 
-Apache
+Apache 2.0
 
 Author Information
 ------------------
