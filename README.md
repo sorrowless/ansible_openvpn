@@ -3,14 +3,13 @@ Role Name
 
 Role to install and configure OpenVPN server
 
-Requirements
-------------
+#### Requirements
 
 Ansible 2.4
 
-Role Variables
---------------
+#### Role Variables
 
+```
 server_name - filename for target server keypair file. It can be useful in case
   you already had some OpenVPN PKI and now just want to migrate to the new
   version, so if you had OpenVPN server keys named after 'some.name.[key,crt]'
@@ -24,15 +23,15 @@ additional_pushes - list of additional pushed which will be advertised for
 clients - list of clients to issue certificate for. In case of first-time
   installation it will be ignored due to way revokation list created. Next
   times it will be used as a name of client to create certificate for.
+```
 
-Dependencies
-------------
+#### Dependencies
 
 None
 
-Example Playbook
-----------------
+#### Example Playbook
 
+```yaml
     - name: Install VPN server and create some client certs for it
       hosts: vpn-server
       remote_user: root
@@ -43,14 +42,12 @@ Example Playbook
           private: no
       roles:
         - vpn
+```
 
-
-License
--------
+#### License
 
 Apache 2.0
 
-Author Information
-------------------
+#### Author Information
 
 Stanislaw Bogatkin (sbog@sbog.ru)
