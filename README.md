@@ -49,7 +49,7 @@ admin_email: admin@localhost
 keys_action: issue
 iptables_configure: True
 # List of clients to issue certificate for. In case of first-time
-# Installation it will be ignored due to way revokation list created. Next
+# installation it will be ignored due to way revokation list created. Next
 # times it will be used as a name of client to create certificate for.
 # Default clients list is empty
 clients: []
@@ -80,4 +80,4 @@ Apache 2.0
 
 #### Author Information
 
-Stanislaw Bogatkin (sbog@sbog.ru)
+Stanislaw Bogatkin (https://sbog.ru)
