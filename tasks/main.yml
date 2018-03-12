@@ -21,6 +21,13 @@
 
 - name: VPN | Configuration | Copy easy-rsa scripts
   shell: "rsync -avi /usr/share/easy-rsa /etc/openvpn"
+  
+- name: VPN | Configuration | Change default CRL list time
+  lineinfile:
+    path: /etc/openvpn/easy-rsa/openssl.cnf
+    regexp: '^default_crl_days'
+    line: 'default_crl_days=3650'
+    insertafter: '^default_days'
 
 - name: VPN | Configuration | Create easy-rsa vars
   template:
