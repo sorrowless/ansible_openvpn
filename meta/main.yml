@@ -10,9 +10,9 @@ galaxy_info:
   platforms:
   - name: Ubuntu
     versions:
-    - 16.04
+    - xenial
 
-  galaxy_tags: [openvpn]
+  galaxy_tags: [openvpn, vpn]
 
 dependencies: []
   # List your role dependencies here, one per line. Be sure to remove the '[]' above,
