@@ -21,7 +21,15 @@
 
 - name: VPN | Configuration | Copy easy-rsa scripts
   shell: "rsync -avi /usr/share/easy-rsa /etc/openvpn"
-  
+  args:
+    creates: /etc/openvpn/easy-rsa/build-ca
+
+- name: VPN | Configuration | Create link to openssl config
+  file:
+    src: /etc/openvpn/easy-rsa/openssl-1.0.0.cnf
+    dest: /etc/openvpn/easy-rsa/openssl.cnf
+    state: link
+
 - name: VPN | Configuration | Change default CRL list time
   lineinfile:
     path: /etc/openvpn/easy-rsa/openssl.cnf
