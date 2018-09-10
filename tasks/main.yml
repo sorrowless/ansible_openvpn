@@ -84,7 +84,7 @@
     - iptables
 
 - name: VPN | Keys creation | Generate server keys
-  include_tasks: setup_server_keys.yml
+  import_tasks: setup_server_keys.yml
   tags:
     - server_keys
 
@@ -94,17 +94,17 @@
   register: revokation_list
 
 - name: VPN | Keys creation | Initialize revokation list
-  include_tasks: initialize_revokation_list.yml
+  import_tasks: initialize_revokation_list.yml
   when: revokation_list.stat.exists == False
 
 - name: VPN | Keys creation | Generate client keys
-  include_tasks: setup_client_keys.yml
+  import_tasks: setup_client_keys.yml
   tags:
     - client_keys
   when: keys_action == 'issue' and (clients | length ) > 0
 
 - name: VPN | Keys revokation | Revoke client certificate
-  include_tasks: revoke_client_keys.yml
+  import_tasks: revoke_client_keys.yml
   tags:
     - revoke_keys
   when: keys_action == 'revoke' and (clients | length ) > 0
