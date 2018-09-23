@@ -42,3 +42,5 @@ iptables_configure: True
 # times it will be used as a name of client to create certificate for.
 # Default clients list is empty
 clients: []
+# Prefix for fetched to local host certificate name. Empty by default
+cert_prefix: ""

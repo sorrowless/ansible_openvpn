@@ -48,6 +48,6 @@
 - name: VPN | Client config creation | Fetch client config to localhost
   fetch:
     src: /etc/openvpn/client_keys/{{ item }}/{{ item }}.ovpn
-    dest: /tmp/{{ item }}.ovpn
+    dest: /tmp/{{ cert_prefix }}{{ item }}.ovpn
     flat: yes
   with_items: "{{ clients }}"
