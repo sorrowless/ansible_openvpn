@@ -1,0 +1,69 @@
+---
+- name: "VPN | Keys creation | Ensure {{ user_name }} keys directories"
+  file:
+    path: /etc/openvpn/client_keys/{{ user_name }}
+    state: directory
+  tags:
+    - create_users
+    - openvpn_users
+
+- name: VPN | Keys creation | Generate client certificates
+  shell: ". ./vars ; ./build-key --batch {{ user_name }}"
+  args:
+    chdir: /etc/openvpn/easy-rsa
+    creates: "/etc/openvpn/easy-rsa/keys/{{ user_name }}.crt"
+  tags:
+    - create_users
+    - openvpn_users
+
+- name: VPN | Client config creation | Register server CA key
+  slurp:
+    src: "/etc/openvpn/server_keys/ca.crt"
+  register: ca_cert
+  tags:
+    - create_users
+    - openvpn_users
+
+- name: VPN | Client config creation | Register tls-auth key
+  slurp:
+    src: "/etc/openvpn/server_keys/ta.key"
+  register: tls_auth
+  tags:
+    - create_users
+    - openvpn_users
+
+- name: VPN | Client config creation | Register client cert
+  slurp:
+    src: "/etc/openvpn/easy-rsa/keys/{{ user_name }}.crt"
+  register: client_cert
+  tags:
+    - create_users
+    - openvpn_users
+
+- name: VPN | Client config creation | Register client key
+  slurp:
+    src: "/etc/openvpn/easy-rsa/keys/{{ user_name }}.key"
+  register: client_key
+  tags:
+    - create_users
+    - openvpn_users
+
+- name: VPN | Client config creation | Generate client config
+  template:
+    src: client.ovpn
+    dest: /etc/openvpn/client_keys/{{ user_name }}/{{ user_name }}.ovpn
+    owner: root
+    group: root
+    mode: 0400
+  tags:
+    - create_users
+    - openvpn_users
+
+- name: VPN | Client config creation | Fetch client config to localhost
+  fetch:
+    src: /etc/openvpn/client_keys/{{ user_name }}/{{ user_name }}.ovpn
+    dest: /tmp/{{ cert_prefix }}{{ user_name }}.ovpn
+    flat: yes
+  tags:
+    - create_users
+    - openvpn_users

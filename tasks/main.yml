@@ -1,110 +1,31 @@
 ---
 - name: VPN | Installation | Prepare OpenVPN repo and install server
-  include_tasks: setup_openvpn_server.yml
+  import_tasks: setup_openvpn_server.yml
+  tags: ['openvpn_packages']
 
-- name: VPN | Installation | Install additional packages
-  package:
-    name: "{{ item }}"
-    state: latest
-  with_items:
-    - easy-rsa
-    - iptables-persistent
+- name: VPN | Installation | Prepare easy-rsa scripts
+  import_tasks: easy_rsa_prepare.yml
+  tags: ['easy_rsa_prepare']
 
-- name: VPN | Configuration | Copy config files
-  template:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
-  with_items:
-    - { src: 'openvpn.conf', dest: '/etc/openvpn/openvpn.conf' }
-  notify:
-    - Restart OpenVPN
-
-- name: VPN | Configuration | Copy easy-rsa scripts
-  shell: "rsync -avi /usr/share/easy-rsa /etc/openvpn"
-  args:
-    creates: /etc/openvpn/easy-rsa/build-ca
-
-- name: VPN | Configuration | Create link to openssl config
-  file:
-    src: /etc/openvpn/easy-rsa/openssl-1.0.0.cnf
-    dest: /etc/openvpn/easy-rsa/openssl.cnf
-    state: link
-
-- name: VPN | Configuration | Change default CRL list time
-  lineinfile:
-    path: /etc/openvpn/easy-rsa/openssl.cnf
-    regexp: '^default_crl_days'
-    line: 'default_crl_days=3650'
-    insertafter: '^default_days'
-
-- name: VPN | Configuration | Create easy-rsa vars
-  template:
-    src: easy_rsa_vars
-    dest: /etc/openvpn/easy-rsa/vars
-
-- name: VPN | Configuration | Create keys dir
-  file:
-    path: /etc/openvpn/easy-rsa/keys
-    state: directory
-
-- name: VPN | Configuration | Allow IP forwarding for IPv4
-  sysctl:
-    name: net.ipv4.ip_forward
-    value: 1
-    sysctl_set: yes
-    reload: yes
-
-- name: VPN | Configuration | Allow iptables input port
-  iptables:
-    table: filter
-    chain: INPUT
-    protocol: "{{ protocol }}"
-    destination_port: "{{ server_port }}"
-    jump: ACCEPT
-  become: yes
-  when: iptables_configure == True
-  tags:
-    - iptables
-
-- name: VPN | Configuration | Allow iptables postrouting
-  iptables:
-    table: nat
-    chain: POSTROUTING
-    source: "{{ vpn_network }}/{{ vpn_cidr }}"
-    jump: MASQUERADE
-  become: yes
-  when: iptables_configure == True
-  tags:
-    - iptables
-
-- name: VPN | Configuration | Save iptables rules
-  shell: "iptables-save > /etc/iptables/rules.v4"
-  when: iptables_configure == True
-  tags:
-    - iptables
+- name: VPN | Installation | Prepare system to be ready to be OpenVPN server
+  import_tasks: system_prepare.yml
+  tags: ['system_prepare']
 
 - name: VPN | Keys creation | Generate server keys
   import_tasks: setup_server_keys.yml
+  tags: ['server_keys']
+
+- name: VPN | Users | Ensure given users on server
+  include_tasks: create_openvpn_user.yml
+  loop: "{{ clients }}"
+  loop_control:
+    loop_var: user_name
   tags:
-    - server_keys
+    - create_users
+    - openvpn_users
 
-- name: VPN | Keys creation | Check for revokation list existance
-  stat:
-    path: /etc/openvpn/easy-rsa/keys/crl.pem
-  register: revokation_list
-
-- name: VPN | Keys creation | Initialize revokation list
-  import_tasks: initialize_revokation_list.yml
-  when: revokation_list.stat.exists == False
-
-- name: VPN | Keys creation | Generate client keys
-  import_tasks: setup_client_keys.yml
+- name: VPN | Users | Revoke not listed users on server
+  import_tasks: revoke_openvpn_users.yml
   tags:
-    - client_keys
-  when: keys_action == 'issue' and (clients | length ) > 0
-
-- name: VPN | Keys revokation | Revoke client certificate
-  import_tasks: revoke_client_keys.yml
-  tags:
-    - revoke_keys
-  when: keys_action == 'revoke' and (clients | length ) > 0
+    - revoke_users
+    - openvpn_users

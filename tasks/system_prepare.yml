@@ -1,0 +1,36 @@
+---
+- name: VPN | Configuration | Allow IP forwarding for IPv4
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: 1
+    sysctl_set: yes
+    reload: yes
+
+- name: VPN | Configuration | Allow iptables input port
+  iptables:
+    table: filter
+    chain: INPUT
+    protocol: "{{ protocol }}"
+    destination_port: "{{ server_port }}"
+    jump: ACCEPT
+  become: yes
+  when: iptables_configure == True
+  tags:
+    - iptables
+
+- name: VPN | Configuration | Allow iptables postrouting
+  iptables:
+    table: nat
+    chain: POSTROUTING
+    source: "{{ vpn_network }}/{{ vpn_cidr }}"
+    jump: MASQUERADE
+  become: yes
+  when: iptables_configure == True
+  tags:
+    - iptables
+
+- name: VPN | Configuration | Save iptables rules
+  shell: "iptables-save > /etc/iptables/rules.v4"
+  when: iptables_configure == True
+  tags:
+    - iptables

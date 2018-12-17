@@ -53,6 +53,12 @@ iptables_configure: True
 # times it will be used as a name of client to create certificate for.
 # Default clients list is empty
 clients: []
+# Prefix for fetched to local host certificate name. Empty by default
+cert_prefix: ""
+# List of additional configs to add to server configuration. One config line
+# per list element, like ['tun-mtu 1420', 'topology subnet',
+# 'explicit-exit-notify 1']
+additional_configs: []
 ```
 
 #### Dependencies
@@ -66,10 +72,6 @@ None
   hosts: vpn-server
   remote_user: root
   sudo: yes
-  vars_prompt:
-    - name: "clients"
-      prompt: "Please enter login name"
-      private: no
   roles:
     - vpn
 ```

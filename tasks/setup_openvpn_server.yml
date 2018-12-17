@@ -13,3 +13,20 @@
   package:
     name: openvpn
     state: latest
+
+- name: VPN | Installation | Install additional packages
+  package:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - easy-rsa
+    - iptables-persistent
+
+- name: VPN | Configuration | Ensure main config file
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - { src: 'openvpn.conf', dest: '/etc/openvpn/openvpn.conf' }
+  notify:
+    - Restart OpenVPN

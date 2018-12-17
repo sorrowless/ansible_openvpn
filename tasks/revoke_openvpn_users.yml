@@ -1,0 +1,30 @@
+---
+- name: VPN | Revokation | Get list of revoked server users
+  shell:
+    cmd: |
+      tail -n+2 /etc/openvpn/easy-rsa/keys/index.txt | \
+      awk '/^R/{print $NF}' | awk -F'/' '{print $7}' | \
+      awk -F'=' '{print $2}'
+  register: server_revoked
+
+- name: VPN | Revokation | Get list of non-revoked server users
+  shell:
+    cmd: |
+      tail -n+2 /etc/openvpn/easy-rsa/keys/index.txt | \
+      awk '/^V/{print $NF}' | awk -F'/' '{print $7}' | \
+      awk -F'=' '{print $2}'
+  register: server_nonrevoked
+
+- name: VPN | Revokation | Check for already revoked users in local list
+  fail:
+    msg: "User {{ item }} found in server revoked users list, choose other name for him"
+  failed_when: item in server_revoked.stdout_lines
+  with_items: "{{ clients }}"
+  changed_when: false
+
+- name: VPN | Revokation | Revoke certificates
+  shell: ". ./vars ; ./revoke-full {{ item }}"
+  args:
+    chdir: /etc/openvpn/easy-rsa
+  with_items: "{{ server_nonrevoked.stdout_lines | reject('in', clients) | list }}"
+  ignore_errors: yes

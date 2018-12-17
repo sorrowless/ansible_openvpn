@@ -22,7 +22,7 @@ protocol: udp
 dev_type: tun
 # If False, ta.key won't be included
 use_tls_auth: True
-# Public address to bind. Can be specified if needed to bind to exact intervace
+# Public address to bind. Can be specified if needed to bind to exact interface
 # address_to_bind: 127.0.0.1
 vpn_network: 10.10.0.0
 vpn_netmask: 255.255.255.0
@@ -40,7 +40,13 @@ iptables_configure: True
 # List of clients to issue certificate for. In case of first-time
 # Installation it will be ignored due to way revokation list created. Next
 # times it will be used as a name of client to create certificate for.
+# In case this list will be less than server active clients, all of them will
+# be revoked.
 # Default clients list is empty
 clients: []
 # Prefix for fetched to local host certificate name. Empty by default
 cert_prefix: ""
+# List of additional configs to add to server configuration. One config line
+# per list element, like ['tun-mtu 1420', 'topology subnet',
+# 'explicit-exit-notify 1']
+additional_configs: []
