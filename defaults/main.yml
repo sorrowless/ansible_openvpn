@@ -38,6 +38,8 @@ admin_email: admin@localhost
 cert_prefix: ""
 auth: SHA512
 cipher: AES-256-CBC
+duplicate_cn: True
+client_to_client: True
 # List of additional configs to add to server configuration. One config line
 # per list element, like ['tun-mtu 1420', 'topology subnet',
 # 'explicit-exit-notify 1']
