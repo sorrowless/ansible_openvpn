@@ -34,8 +34,14 @@ ping: 5
 ping_restart: 30
 syslog_name: openvpn
 admin_email: admin@localhost
-# What to do with given client name. Valid values: issue, revoke
-keys_action: issue
+# Prefix for fetched to local host certificate name. Empty by default
+cert_prefix: ""
+auth: SHA512
+cipher: AES-256-CBC
+# List of additional configs to add to server configuration. One config line
+# per list element, like ['tun-mtu 1420', 'topology subnet',
+# 'explicit-exit-notify 1']
+additional_configs: []
 iptables_configure: True
 # List of clients to issue certificate for. In case of first-time
 # Installation it will be ignored due to way revokation list created. Next
@@ -44,9 +50,3 @@ iptables_configure: True
 # be revoked.
 # Default clients list is empty
 clients: []
-# Prefix for fetched to local host certificate name. Empty by default
-cert_prefix: ""
-# List of additional configs to add to server configuration. One config line
-# per list element, like ['tun-mtu 1420', 'topology subnet',
-# 'explicit-exit-notify 1']
-additional_configs: []
