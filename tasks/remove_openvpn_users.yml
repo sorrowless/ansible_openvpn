@@ -1,0 +1,64 @@
+---
+- name: VPN | Revokation | Get list of revoked server users
+  shell:
+    cmd: |
+      tail -n+2 /etc/openvpn/easy-rsa/keys/index.txt | \
+      awk '/^R/{print $NF}' | awk -F'/' '{print $7}' | \
+      awk -F'=' '{print $2}'
+  register: server_revoked
+
+- name: VPN | Revokation | Get list of non-revoked server users
+  shell:
+    cmd: |
+      tail -n+2 /etc/openvpn/easy-rsa/keys/index.txt | \
+      awk '/^V/{print $NF}' | awk -F'/' '{print $7}' | \
+      awk -F'=' '{print $2}'
+  register: server_nonrevoked
+
+- name: VPN | Revokation | Get locally defined users names
+  set_fact:
+    usernames: "{{ usernames | default([]) }} + [ {{ item.name }} ]"
+  with_items: "{{ clients }}"
+
+- name: VPN | Revokation | Check for already revoked users in local list
+  fail:
+    msg: "User {{ item }} found in server revoked users list, choose other name for him"
+  failed_when: item in server_revoked.stdout_lines
+  with_items: "{{ usernames }}"
+  changed_when: false
+
+- name: VPN | Revokation | Get users to revoke
+  # WTF you may ask. Reject is a standard Jinja2 filter which allows you to
+  # reject items from your sequence based on given test. 'In' is actually a
+  # test, so basically here we're getting all server non-revoked users and for
+  # each item of this list check if it is in our locally defined clients list.
+  # If it is, we're reject it from original sequence. As a result we have a
+  # list of users which are not exists in our local list but exists on server,
+  # what means they should be revoked
+  set_fact:
+    users_to_revoke: "{{ server_nonrevoked.stdout_lines | reject('in', usernames) | list }}"
+
+- name: VPN | Revokation | Revoke certificates
+  shell: ". ./vars ; ./revoke-full {{ item }}"
+  args:
+    chdir: /etc/openvpn/easy-rsa
+  with_items: "{{ users_to_revoke }}"
+  ignore_errors: yes
+
+- name: VPN | Revokation | Ensure valid permissions to easy-rsa dirs
+  file:
+    path: /etc/openvpn/easy-rsa/keys
+    state: directory
+    mode: 0755
+
+- name: VPN | Revokation | Ensure valid permissions to crl file
+  file:
+    path: /etc/openvpn/easy-rsa/keys/crl.pem
+    state: file
+    mode: 0644
+
+- name: VPN | CCD | Remove revoked users ccd files
+  file:
+    path: "{{ client_config_dir_path }}/{{ item }}"
+    state: absent
+  with_items: "{{ users_to_revoke }}"

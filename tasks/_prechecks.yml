@@ -1,0 +1,16 @@
+---
+- name: VPN | Checks | Topology type
+  fail:
+    msg: "Valid topology types are: subnet, net30, p2p; your is {{ topology }}"
+  when: dev_type == 'tun' and topology not in ['subnet', 'net30', 'p2p']
+
+- name: VPN | Checks | Device type
+  fail:
+    msg: "Valid dev types are: tun, tap; your is {{ dev_type }}"
+  when: dev_type not in ['tun', 'tap']
+
+- name: VPN | Checks | User names
+  fail:
+    msg: "One or more user names are missed"
+  failed_when: item.name is not defined
+  with_items: "{{ clients }}"

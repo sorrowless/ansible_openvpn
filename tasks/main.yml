@@ -1,4 +1,8 @@
 ---
+- name: VPN | Checks | Check provided options
+  import_tasks: _prechecks.yml
+  tags: ['checks']
+
 - name: VPN | Installation | Prepare OpenVPN repo and install server
   import_tasks: setup_openvpn_server.yml
   tags: ['openvpn_packages']
@@ -19,13 +23,13 @@
   include_tasks: create_openvpn_user.yml
   loop: "{{ clients }}"
   loop_control:
-    loop_var: user_name
+    loop_var: user
   tags:
     - create_users
     - openvpn_users
 
 - name: VPN | Users | Revoke not listed users on server
-  import_tasks: revoke_openvpn_users.yml
+  import_tasks: remove_openvpn_users.yml
   tags:
     - revoke_users
     - openvpn_users

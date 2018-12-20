@@ -11,8 +11,13 @@ server_name: localhost
 # connect to, otherwise 'server_name' var will be used. Optional.
 #real_server_name: 100.100.100.100
 
-# List of additional pushes which will be advertised for
-# clients.
+# Available options: subnet, net30, p2p. In case dev_type is tap, has no
+# no meaning and p2p will always be used
+topology: subnet
+client_config_dir_path: /etc/openvpn/ccd
+persist_tun: True
+persist_key: True
+# List of additional pushes which will be advertised for all clients.
 additional_pushes:
  - "redirect-gateway def1"
 # Server address and type
@@ -27,6 +32,13 @@ use_tls_auth: True
 vpn_network: 10.10.0.0
 vpn_netmask: 255.255.255.0
 vpn_cidr: 24
+# nopool parameter disables internal DHCP clients pool, so if it is enabled
+# then user IPs should be set either manually or only static IPs should be
+# used
+nopool: False
+# ifconfig-pool can be used with nopool in conjunction in standard format like
+# 10.10.0.2 10.10.0.253 255.255.255.0
+ifconfig_pool: False
 dns_pushes:
   - 8.8.8.8
   - 8.8.4.4
@@ -45,10 +57,19 @@ client_to_client: True
 # 'explicit-exit-notify 1']
 additional_configs: []
 iptables_configure: True
-# List of clients to issue certificate for. In case of first-time
-# Installation it will be ignored due to way revokation list created. Next
-# times it will be used as a name of client to create certificate for.
-# In case this list will be less than server active clients, all of them will
-# be revoked.
-# Default clients list is empty
+# List of clients to issue certificate for. In case this list will be less
+# than server active clients, non-existing in this list will be revoked.
+# List of users consists of none or more hashes with appropriate values. Next
+# values are supported:
+# - name: Is the name of client. Required
+# - email: Client email. If exists, created .ovpn file will be sent to it.
+#          Optional
+# - ip_info: IP address and subnet mask of client. If exists, will be set to
+#            client CCD ifconfig-push. Optional
+# Example of clients list:
+# clients:
+#   - name: user
+#     email: user@example.com
+#     ip_info: "192.168.0.1 255.255.255.0"
+# Default clients list is empty.
 clients: []

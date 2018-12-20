@@ -1,20 +1,32 @@
 ---
-- name: "VPN | Keys creation | Ensure {{ user_name }} keys directories"
+- name: "VPN | Keys creation | Ensure {{ user.name }} keys directories"
   file:
-    path: /etc/openvpn/client_keys/{{ user_name }}
+    path: /etc/openvpn/client_keys/{{ user.name }}
     state: directory
   tags:
     - create_users
     - openvpn_users
 
 - name: VPN | Keys creation | Generate client certificates
-  shell: ". ./vars ; ./build-key --batch {{ user_name }}"
+  shell: ". ./vars ; ./build-key --batch {{ user.name }}"
   args:
     chdir: /etc/openvpn/easy-rsa
-    creates: "/etc/openvpn/easy-rsa/keys/{{ user_name }}.crt"
+    creates: "/etc/openvpn/easy-rsa/keys/{{ user.name }}.crt"
   tags:
     - create_users
     - openvpn_users
+
+- name: VPN | Client config creation | Ensure user ccd file
+  copy:
+    content: "ifconfig-push {{ user.ip_info }}"
+    dest: "{{ client_config_dir_path }}/{{ user.name }}"
+    owner: root
+    group: root
+    mode: 0755
+  when: user.ip_info is defined
+  tags:
+  - create_users
+  - openvpn_users
 
 - name: VPN | Client config creation | Register server CA key
   slurp:
@@ -34,7 +46,7 @@
 
 - name: VPN | Client config creation | Register client cert
   slurp:
-    src: "/etc/openvpn/easy-rsa/keys/{{ user_name }}.crt"
+    src: "/etc/openvpn/easy-rsa/keys/{{ user.name }}.crt"
   register: client_cert
   tags:
     - create_users
@@ -42,7 +54,7 @@
 
 - name: VPN | Client config creation | Register client key
   slurp:
-    src: "/etc/openvpn/easy-rsa/keys/{{ user_name }}.key"
+    src: "/etc/openvpn/easy-rsa/keys/{{ user.name }}.key"
   register: client_key
   tags:
     - create_users
@@ -51,7 +63,7 @@
 - name: VPN | Client config creation | Generate client config
   template:
     src: client.ovpn
-    dest: /etc/openvpn/client_keys/{{ user_name }}/{{ user_name }}.ovpn
+    dest: /etc/openvpn/client_keys/{{ user.name }}/{{ user.name }}.ovpn
     owner: root
     group: root
     mode: 0400
@@ -61,8 +73,8 @@
 
 - name: VPN | Client config creation | Fetch client config to localhost
   fetch:
-    src: /etc/openvpn/client_keys/{{ user_name }}/{{ user_name }}.ovpn
-    dest: /tmp/{{ cert_prefix }}{{ user_name }}.ovpn
+    src: /etc/openvpn/client_keys/{{ user.name }}/{{ user.name }}.ovpn
+    dest: /tmp/{{ cert_prefix }}{{ user.name }}.ovpn
     flat: yes
   tags:
     - create_users
