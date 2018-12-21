@@ -12,6 +12,7 @@
   args:
     chdir: /etc/openvpn/easy-rsa
     creates: "/etc/openvpn/easy-rsa/keys/{{ user.name }}.crt"
+  register: user_cert
   tags:
     - create_users
     - openvpn_users
@@ -76,6 +77,24 @@
     src: /etc/openvpn/client_keys/{{ user.name }}/{{ user.name }}.ovpn
     dest: /tmp/{{ cert_prefix }}{{ user.name }}.ovpn
     flat: yes
+  when: user_cert.changed
   tags:
     - create_users
     - openvpn_users
+
+- name: VPN | Client config creation | Send config to user email
+  mail:
+    host: "{{ mail.host }}"
+    port: "{{ mail.port }}"
+    username: "{{ mail.user }}"
+    sender: "{{ mail.user }}"
+    password: "{{ mail.secret }}"
+    to: "{{ user.email }}"
+    subject: "{{ mail.subject }}"
+    body: "{{ mail.body }}"
+    attach: ["/etc/openvpn/client_keys/{{ user.name }}/{{ user.name }}.ovpn"]
+  when: user.email is defined and mail.host is defined and user_cert.changed
+  tags:
+    - create_users
+    - openvpn_users
+    - send_mails

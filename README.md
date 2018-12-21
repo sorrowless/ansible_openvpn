@@ -5,7 +5,12 @@ Role to install and configure OpenVPN server
 
 #### Requirements
 
-Ansible 2.4
+2.4=<Ansible<2.7
+Ansible 2.7 has a bug with email sending support, so in case you do not need
+to send emails, feel free to use versions 2.7+ also. For details look at
+github issues 46673 and 48785 - different ansible versions does not work with
+different python versions, so secure way is to use ansible prior to 2.7 until
+all will be fixed.
 
 #### Role Variables
 

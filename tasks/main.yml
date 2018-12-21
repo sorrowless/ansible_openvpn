@@ -27,6 +27,7 @@
   tags:
     - create_users
     - openvpn_users
+    - send_mails
 
 - name: VPN | Users | Revoke not listed users on server
   import_tasks: remove_openvpn_users.yml

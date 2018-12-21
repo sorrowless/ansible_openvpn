@@ -73,3 +73,13 @@ iptables_configure: True
 #     ip_info: "192.168.0.1 255.255.255.0"
 # Default clients list is empty.
 clients: []
+# Additionally user VPN config can be sent to user email after creation. There
+# are needed options for that
+# mail:
+#   host: smtp.google.com
+#   port: 587
+#   user: user
+#   secret: password
+#   subject: "VPN configuration"
+#   body: "Your new VPN configuration is in attach"
+mail: {}
