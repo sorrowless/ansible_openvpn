@@ -20,6 +20,8 @@ persist_key: True
 # List of additional pushes which will be advertised for all clients.
 additional_pushes:
  - "redirect-gateway def1"
+# Whether we should allow users to reach internet
+allow_masquerade: True
 # Server address and type
 server_port: 1494
 protocol: udp
@@ -45,7 +47,6 @@ dns_pushes:
 ping: 5
 ping_restart: 30
 syslog_name: openvpn
-admin_email: admin@localhost
 # Prefix for fetched to local host certificate name. Empty by default
 cert_prefix: ""
 auth: SHA512
@@ -83,3 +84,10 @@ clients: []
 #   subject: "VPN configuration"
 #   body: "Your new VPN configuration is in attach"
 mail: {}
+ca:
+  country: RU
+  province: MSK
+  city: Moscow
+  org: Unknown
+  ou: DevOps
+  email: admin@localhost

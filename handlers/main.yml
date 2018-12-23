@@ -1,5 +1,5 @@
 ---
 - name: Restart OpenVPN
   service:
-    name: openvpn
+    name: openvpn@openvpn.service
     state: restarted

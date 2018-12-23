@@ -18,6 +18,17 @@
   tags:
     - iptables
 
+- name: VPN | Configuration | Allow iptables vnet source
+  iptables:
+    table: filter
+    chain: INPUT
+    source: "{{ vpn_network }}/{{ vpn_cidr }}"
+    jump: ACCEPT
+  become: yes
+  when: iptables_configure == True
+  tags:
+    - iptables
+
 - name: VPN | Configuration | Allow iptables postrouting
   iptables:
     table: nat
@@ -25,7 +36,7 @@
     source: "{{ vpn_network }}/{{ vpn_cidr }}"
     jump: MASQUERADE
   become: yes
-  when: iptables_configure == True
+  when: iptables_configure == True and allow_masquerade == True
   tags:
     - iptables
 

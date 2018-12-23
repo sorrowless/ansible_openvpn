@@ -3,16 +3,25 @@
   apt_key:
     url: https://swupdate.openvpn.net/repos/repo-public.gpg
     state: present
+  when: ansible_distribution_version == '16.04'
 
 - name: VPN | Installation | Add official OpenVPN repository
   apt_repository:
     repo: deb http://build.openvpn.net/debian/openvpn/stable xenial main
     state: present
+  when: ansible_distribution_version == '16.04'
 
 - name: VPN | Installation | Install latest version of OpenVPN server
   package:
     name: openvpn
     state: latest
+  when: ansible_distribution_version == '16.04'
+
+- name: VPN | Installation | Install latest version of OpenVPN server
+  package:
+    name: openvpn
+    state: latest
+  when: ansible_distribution_version == '18.04'
 
 - name: VPN | Installation | Install additional packages
   package:
@@ -21,15 +30,6 @@
   with_items:
     - easy-rsa
     - iptables-persistent
-
-- name: VPN | Configuration | Ensure main config file
-  template:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
-  with_items:
-    - { src: 'openvpn.conf', dest: '/etc/openvpn/openvpn.conf' }
-  notify:
-    - Restart OpenVPN
 
 - name: VPN | Configuration | Ensure client config dif
   file:

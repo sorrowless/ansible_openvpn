@@ -61,12 +61,12 @@ export KEY_EXPIRE=3650
 # These are the default values for fields
 # which will be placed in the certificate.
 # Don't leave any of these fields blank.
-export KEY_COUNTRY="RU"
-export KEY_PROVINCE="MSK"
-export KEY_CITY="Moscow"
-export KEY_ORG="Unknown"
-export KEY_EMAIL="{{ admin_email }}"
-export KEY_OU="DevOps"
+export KEY_COUNTRY="{{ ca.country }}"
+export KEY_PROVINCE="{{ ca.province }}"
+export KEY_CITY="{{ ca.city }}"
+export KEY_ORG="{{ ca.org }}"
+export KEY_EMAIL="{{ ca.email }}"
+export KEY_OU="{{ ca.ou }}"
 
 # X509 Subject Field
 export KEY_NAME="EasyRSA"

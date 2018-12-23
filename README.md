@@ -66,6 +66,8 @@ cert_prefix: ""
 additional_configs: []
 ```
 
+For full list of variables look to `defaults/main.yml` file.
+
 #### Dependencies
 
 None
