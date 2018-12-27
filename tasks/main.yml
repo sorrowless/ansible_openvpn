@@ -29,6 +29,12 @@
     - openvpn_users
     - send_mails
 
+- name: VPN | Configuration | Check if CRL file exists
+  stat:
+    path: /etc/openvpn/easy-rsa/keys/crl.pem
+  register: crl_file
+  tags: ['openvpn_config']
+
 - name: VPN | Users | Revoke not listed users on server
   import_tasks: remove_openvpn_users.yml
   tags:
