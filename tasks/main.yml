@@ -33,7 +33,10 @@
   stat:
     path: /etc/openvpn/easy-rsa/keys/crl.pem
   register: crl_file
-  tags: ['openvpn_config']
+  tags:
+    - openvpn_config
+    - revoke_users
+    - openvpn_users
 
 - name: VPN | Users | Revoke not listed users on server
   import_tasks: remove_openvpn_users.yml
