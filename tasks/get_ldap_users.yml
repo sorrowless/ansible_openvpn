@@ -1,0 +1,68 @@
+---
+- name: VPN | LDAP | Get VPN users list
+  shell:
+    cmd: |
+      ldapsearch -h {{ ldap_config.host }} -p {{ ldap_config.port }} -w {{ ldap_config.auth_password }} -D {{ ldap_config.bind_dn }} -b {{ ldap_config.vpn_group }} -s sub -LLL {{ ldap_config.group_client_attribute }} | tail -n+2 | awk -F ': ' '{ print $2 }'
+  delegate_to: localhost
+  run_once: True
+  become: False
+  register: ldap_clients
+
+- name: VPN | LDAP | Get VPN users names
+  shell:
+    cmd: |
+      ldapsearch -h {{ ldap_config.host }} -p {{ ldap_config.port }} -w {{ ldap_config.auth_password }} -D {{ ldap_config.bind_dn }} -b '{{ item }}' -s sub -LLL {{ ldap_config.client_name_attribute }} | tail -n+2 | awk -F ': ' '{ print $2 }'
+  with_items: "{{ ldap_clients.stdout_lines }}"
+  delegate_to: localhost
+  run_once: True
+  become: False
+  register: ldap_clients_names
+
+- name: VPN | LDAP | Set fact for users names
+  set_fact:
+    ldap_usernames: []
+
+- name: VPN | LDAP | Get list of users names
+  set_fact:
+    ldap_usernames: "{{ ldap_usernames + [ item.stdout ] }}"
+  with_items: "{{ ldap_clients_names.results }}"
+
+- name: VPN | LDAP | Get VPN users emails
+  shell:
+    cmd: |
+      ldapsearch -h {{ ldap_config.host }} -p {{ ldap_config.port }} -w {{ ldap_config.auth_password }} -D {{ ldap_config.bind_dn }} -b '{{ item }}' -s sub -LLL {{ ldap_config.client_email_attribute }} | tail -n+2 | awk -F ': ' '{ print $2 }'
+  with_items: "{{ ldap_clients.stdout_lines }}"
+  delegate_to: localhost
+  run_once: True
+  become: False
+  register: ldap_clients_emails
+
+- name: VPN | LDAP | Set fact for users emails
+  set_fact:
+    ldap_usermails: []
+
+- name: VPN | LDAP | Get list of users emails
+  set_fact:
+    ldap_usermails: "{{ ldap_usermails + [ item.stdout ] }}"
+  with_items: "{{ ldap_clients_emails.results }}"
+
+- name: VPN | LDAP | Set fact for users data
+  set_fact:
+    ldap_clients: []
+
+- name: VPN | LDAP | Get list of users data
+  set_fact:
+    ldap_clients: "{{ ldap_clients + [{ 'name': item.0, 'email': item.1 }] }}"
+  with_together:
+    - "{{ ldap_usernames }}"
+    - "{{ ldap_usermails }}"
+  delegate_to: localhost
+  run_once: True
+  become: False
+
+- name: VPN | LDAP | Append LDAP clients to local clients
+  set_fact:
+    clients: "{{ clients + ldap_clients }}"
+
+- name: VPN | LDAP | Show VPN users data
+  debug: var=clients

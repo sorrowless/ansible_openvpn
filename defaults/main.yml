@@ -58,22 +58,6 @@ client_to_client: True
 # 'explicit-exit-notify 1']
 additional_configs: []
 iptables_configure: True
-# List of clients to issue certificate for. In case this list will be less
-# than server active clients, non-existing in this list will be revoked.
-# List of users consists of none or more hashes with appropriate values. Next
-# values are supported:
-# - name: Is the name of client. Required
-# - email: Client email. If exists, created .ovpn file will be sent to it.
-#          Optional
-# - ip_info: IP address and subnet mask of client. If exists, will be set to
-#            client CCD ifconfig-push. Optional
-# Example of clients list:
-# clients:
-#   - name: user
-#     email: user@example.com
-#     ip_info: "192.168.0.1 255.255.255.0"
-# Default clients list is empty.
-clients: []
 # Additionally user VPN config can be sent to user email after creation. There
 # are needed options for that
 # mail:
@@ -91,3 +75,36 @@ ca:
   org: Unknown
   ou: DevOps
   email: admin@localhost
+# There are two main ways to get clients list from. First is local list there,
+# in Ansible variables. Second is LDAP.
+#
+# So, first go to the local clients list options.
+#
+# List of clients to issue certificate for. In case this list will be less
+# than server active clients, non-existing in this list will be revoked.
+# List of users consists of none or more hashes with appropriate values. Next
+# values are supported:
+# - name: Is the name of client. Required
+# - email: Client email. If exists, created .ovpn file will be sent to it.
+#          Optional
+# - ip_info: IP address and subnet mask of client. If exists, will be set to
+#            client CCD ifconfig-push. Optional
+# Example of clients list:
+# clients:
+#   - name: user
+#     email: user@example.com
+#     ip_info: "192.168.0.1 255.255.255.0"
+# Default clients list is empty.
+clients: []
+#
+# Second, LDAP clients list options
+ldap_config:
+  host: localhost
+  port: 3389
+  auth_password: ldap_password
+  bind_dn: 'CN=VPN,OU=Managed Accounts,DC=example,DC=com'
+  vpn_group: 'CN=VPN_ACCESS,DC=example,DC=com'
+  group_client_attribute: 'member'
+  client_name_attribute: 'sAMAccountName'
+  client_email_attribute: 'userPrincipalName'
+use_ldap: False
