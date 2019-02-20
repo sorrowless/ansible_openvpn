@@ -14,22 +14,34 @@
 - name: VPN | Installation | Install latest version of OpenVPN server
   package:
     name: openvpn
-    state: latest
+    state: present
   when: ansible_distribution_version == '16.04'
+  register: task_result
+  until: task_result is success
+  retries: 10
+  delay: 2
 
 - name: VPN | Installation | Install latest version of OpenVPN server
   package:
     name: openvpn
-    state: latest
+    state: present
   when: ansible_distribution_version == '18.04'
+  register: task_result
+  until: task_result is success
+  retries: 10
+  delay: 2
 
 - name: VPN | Installation | Install additional packages
   package:
     name: "{{ item }}"
-    state: latest
+    state: present
   with_items:
     - easy-rsa
     - iptables-persistent
+  register: task_result
+  until: task_result is success
+  retries: 3
+  delay: 2
 
 - name: VPN | Configuration | Ensure client config dif
   file:

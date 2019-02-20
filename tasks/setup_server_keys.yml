@@ -46,4 +46,3 @@
     - "{{ server_name }}.key"
     - crl.pem
     - dh2048.pem
-
