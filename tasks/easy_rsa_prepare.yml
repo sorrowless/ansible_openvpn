@@ -1,6 +1,6 @@
 ---
 - name: VPN | Configuration | Copy easy-rsa scripts
-  shell: "rsync -avi /usr/share/easy-rsa /etc/openvpn"
+  command: "rsync -avi /usr/share/easy-rsa /etc/openvpn"
   args:
     creates: /etc/openvpn/easy-rsa/build-ca
 

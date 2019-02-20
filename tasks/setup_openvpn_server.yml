@@ -34,7 +34,7 @@
 - name: VPN | Configuration | Ensure client config dif
   file:
     state: directory
-    path: "{{ client_config_dir_path}}"
+    path: "{{ client_config_dir_path }}"
     mode: 0755
     owner: root
     group: root

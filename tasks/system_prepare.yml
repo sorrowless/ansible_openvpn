@@ -14,7 +14,7 @@
     destination_port: "{{ server_port }}"
     jump: ACCEPT
   become: yes
-  when: iptables_configure == True
+  when: iptables_configure
   tags:
     - iptables
 
@@ -25,7 +25,7 @@
     source: "{{ vpn_network }}/{{ vpn_cidr }}"
     jump: ACCEPT
   become: yes
-  when: iptables_configure == True
+  when: iptables_configure
   tags:
     - iptables
 
@@ -36,12 +36,12 @@
     source: "{{ vpn_network }}/{{ vpn_cidr }}"
     jump: MASQUERADE
   become: yes
-  when: iptables_configure == True and allow_masquerade == True
+  when: iptables_configure and allow_masquerade
   tags:
     - iptables
 
 - name: VPN | Configuration | Save iptables rules
   shell: "iptables-save > /etc/iptables/rules.v4"
-  when: iptables_configure == True
+  when: iptables_configure
   tags:
     - iptables

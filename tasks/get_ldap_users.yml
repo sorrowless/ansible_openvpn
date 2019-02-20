@@ -2,20 +2,30 @@
 - name: VPN | LDAP | Get VPN users list
   shell:
     cmd: |
-      ldapsearch -h {{ ldap_config.host }} -p {{ ldap_config.port }} -w {{ ldap_config.auth_password }} -D {{ ldap_config.bind_dn }} -b {{ ldap_config.vpn_group }} -s sub -LLL {{ ldap_config.group_client_attribute }} | tail -n+2 | awk -F ': ' '{ print $2 }'
+      ldapsearch -h {{ ldap_config.host }} -p {{ ldap_config.port }} \
+        -w {{ ldap_config.auth_password }} -D {{ ldap_config.bind_dn }} \
+        -b {{ ldap_config.vpn_group }} -s sub \
+        -LLL {{ ldap_config.group_client_attribute }} | tail -n+2 | \
+        awk -F ': ' '{ print $2 }'
   delegate_to: localhost
   run_once: True
   become: False
+  changed_when: False
   register: ldap_clients
 
 - name: VPN | LDAP | Get VPN users names
   shell:
     cmd: |
-      ldapsearch -h {{ ldap_config.host }} -p {{ ldap_config.port }} -w {{ ldap_config.auth_password }} -D {{ ldap_config.bind_dn }} -b '{{ item }}' -s sub -LLL {{ ldap_config.client_name_attribute }} | tail -n+2 | awk -F ': ' '{ print $2 }'
+      ldapsearch -h {{ ldap_config.host }} -p {{ ldap_config.port }} \
+        -w {{ ldap_config.auth_password }} -D {{ ldap_config.bind_dn }} \
+        -b '{{ item }}' -s sub \
+        -LLL {{ ldap_config.client_name_attribute }} | tail -n+2 | \
+        awk -F ': ' '{ print $2 }'
   with_items: "{{ ldap_clients.stdout_lines }}"
   delegate_to: localhost
   run_once: True
   become: False
+  changed_when: False
   register: ldap_clients_names
 
 - name: VPN | LDAP | Set fact for users names
@@ -30,11 +40,16 @@
 - name: VPN | LDAP | Get VPN users emails
   shell:
     cmd: |
-      ldapsearch -h {{ ldap_config.host }} -p {{ ldap_config.port }} -w {{ ldap_config.auth_password }} -D {{ ldap_config.bind_dn }} -b '{{ item }}' -s sub -LLL {{ ldap_config.client_email_attribute }} | tail -n+2 | awk -F ': ' '{ print $2 }'
+      ldapsearch -h {{ ldap_config.host }} -p {{ ldap_config.port }} \
+        -w {{ ldap_config.auth_password }} -D {{ ldap_config.bind_dn }} \
+        -b '{{ item }}' -s sub \
+        -LLL {{ ldap_config.client_email_attribute }} | tail -n+2 | \
+        awk -F ': ' '{ print $2 }'
   with_items: "{{ ldap_clients.stdout_lines }}"
   delegate_to: localhost
   run_once: True
   become: False
+  changed_when: False
   register: ldap_clients_emails
 
 - name: VPN | LDAP | Set fact for users emails

@@ -5,6 +5,7 @@
       tail -n+2 /etc/openvpn/easy-rsa/keys/index.txt | \
       awk '/^R/{print $NF}' | awk -F'/' '{print $7}' | \
       awk -F'=' '{print $2}'
+  changed_when: false
   register: server_revoked
 
 - name: VPN | Revokation | Get list of non-revoked server users
@@ -13,6 +14,7 @@
       tail -n+2 /etc/openvpn/easy-rsa/keys/index.txt | \
       awk '/^V/{print $NF}' | awk -F'/' '{print $7}' | \
       awk -F'=' '{print $2}'
+  changed_when: false
   register: server_nonrevoked
 
 - name: VPN | Revokation | Get locally defined users names

@@ -21,7 +21,7 @@
 
 - name: VPN | Users | Get users list
   import_tasks: get_ldap_users.yml
-  when: use_ldap == True
+  when: use_ldap
   tags: ['ldap']
 
 - name: VPN | Users | Ensure given users on server
