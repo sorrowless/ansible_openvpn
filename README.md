@@ -48,6 +48,7 @@ dns_pushes:
   - 8.8.4.4
 ping: 5
 ping_restart: 30
+comp_lzo: True
 syslog_name: openvpn
 admin_email: admin@localhost
 # What to do with given client name. Valid values: issue, revoke

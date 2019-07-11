@@ -46,6 +46,7 @@ dns_pushes:
   - 8.8.4.4
 ping: 5
 ping_restart: 30
+comp_lzo: True
 syslog_name: openvpn
 # Prefix for fetched to local host certificate name. Empty by default
 cert_prefix: ""
