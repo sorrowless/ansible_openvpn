@@ -50,3 +50,11 @@
     mode: 0755
     owner: root
     group: root
+
+- name: VPN | Configuration | Ensure log dir
+  file:
+    state: directory
+    path: /var/log/openvpn
+    mode: 0750
+    owner: root
+    group: syslog

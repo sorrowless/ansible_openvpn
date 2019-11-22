@@ -46,7 +46,7 @@ dns_pushes:
   - 8.8.4.4
 ping: 5
 ping_restart: 30
-comp_lzo: True
+comp_lzo: False
 syslog_name: openvpn
 # Prefix for fetched to local host certificate name. Empty by default
 cert_prefix: ""
@@ -54,6 +54,7 @@ auth: SHA512
 cipher: AES-256-CBC
 duplicate_cn: True
 client_to_client: True
+enable_logging: False
 # List of additional configs to add to server configuration. One config line
 # per list element, like ['tun-mtu 1420', 'topology subnet',
 # 'explicit-exit-notify 1']
