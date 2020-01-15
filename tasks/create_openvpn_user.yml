@@ -17,7 +17,7 @@
     - create_users
     - openvpn_users
 
-- name: VPN | Client config creation | Ensure user ccd file
+- name: VPN | Client config creation | Ensure user ccd file from ip-info block
   copy:
     content: "ifconfig-push {{ user.ip_info }}"
     dest: "{{ client_config_dir_path }}/{{ user.name }}"
@@ -25,6 +25,18 @@
     group: root
     mode: 0755
   when: user.ip_info is defined
+  tags:
+  - create_users
+  - openvpn_users
+
+- name: VPN | Client config creation | Ensure user ccd file
+  template:
+    src: ccd
+    dest: "{{ client_config_dir_path }}/{{ user.name }}"
+    owner: root
+    group: root
+    mode: 0755
+  when: user.ccd is defined
   tags:
   - create_users
   - openvpn_users
