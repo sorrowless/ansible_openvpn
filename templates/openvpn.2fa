@@ -1,0 +1,6 @@
+{% if ansible_distribution_release == 'xenial' %}
+auth    requisite       /lib/security/pam_google_authenticator.so secret={{ client_2fa_dir_path }}/${USER} user=root
+{% else %}
+auth    requisite       /lib/x86_64-linux-gnu/security/pam_google_authenticator.so secret={{ client_2fa_dir_path }}/${USER} user=root
+{% endif %}
+account    required     pam_permit.so

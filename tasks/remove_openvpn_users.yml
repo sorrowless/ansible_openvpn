@@ -65,3 +65,15 @@
     path: "{{ client_config_dir_path }}/{{ item }}"
     state: absent
   with_items: "{{ users_to_revoke }}"
+
+- name: VPN | 2fa | Remove revoked users 2fa files
+  file:
+    path: "{{ client_2fa_dir_path }}/{{ item }}"
+    state: absent
+  with_items: "{{ users_to_revoke }}"
+
+- name: VPN | 2fa | Remove revoked users 2fa info files
+  file:
+    path: "{{ client_2fa_dir_path }}/{{ item }}.2fa_info"
+    state: absent
+  with_items: "{{ users_to_revoke }}"

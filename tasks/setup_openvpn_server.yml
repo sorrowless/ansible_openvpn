@@ -43,6 +43,16 @@
   retries: 3
   delay: 2
 
+- name: VPN | Install libpam authenticator
+  package:
+    name: libpam-google-authenticator
+    state: latest
+  register: task_result
+  when: enable_2fa
+  until: task_result is success
+  retries: 3
+  delay: 2
+
 - name: VPN | Configuration | Ensure client config dif
   file:
     state: directory
@@ -50,6 +60,15 @@
     mode: 0755
     owner: root
     group: root
+
+- name: VPN | Configuration | Ensure client 2fa config dif
+  file:
+    state: directory
+    path: "{{ client_2fa_dir_path }}"
+    mode: 0755
+    owner: root
+    group: root
+  when: enable_2fa
 
 - name: VPN | Configuration | Ensure log dir
   file:

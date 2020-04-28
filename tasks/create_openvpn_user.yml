@@ -94,6 +94,106 @@
     - create_users
     - openvpn_users
 
+- name: VPN | Client config creation | Ensure user 2fa configuration
+  become: yes
+  become_user: root
+  shell:
+    cmd: |
+      google-authenticator -t -s {{ user.name }} -f -Q UTF8 -d -w 1 -r 3 -R 30
+    creates: "{{ client_2fa_dir_path }}/{{ user.name }}"
+  register: info_2fa
+  when:
+    - enable_2fa
+    - ansible_distribution_release == 'xenial'
+  args:
+    chdir: "{{ client_2fa_dir_path }}"
+  tags:
+  - create_users
+  - openvpn_users
+  - 2fa
+
+- name: VPN | Client config creation | Ensure user 2fa configuration
+  become: yes
+  become_user: root
+  shell:
+    cmd: |
+      google-authenticator -t -s {{ user.name }} -f -Q UTF8 -d -w 1 -r 3 -R 30 -l {{ user.name }} -i "{{ client_2fa_server_description }}"
+    creates: "{{ client_2fa_dir_path }}/{{ user.name }}"
+  register: info_2fa
+  when:
+    - enable_2fa
+    - ansible_distribution_release != 'xenial'
+  args:
+    chdir: "{{ client_2fa_dir_path }}"
+  tags:
+  - create_users
+  - openvpn_users
+  - 2fa
+
+- name: VPN | Client config creation | Ensure 2fa info for user
+  become: yes
+  become_user: root
+  copy:
+    dest: "{{ client_2fa_dir_path }}/{{ user.name }}.2fa_info"
+    content: |
+      These are values to ensure your 2FA settings for given OpenVPN config file:
+
+        QR code link: {{ info_2fa.stdout_lines[0] | regex_replace('^(.*)root@.*(%3Fsecret.*)$', '\1' + client_2fa_server_description | urlencode + '%20(' + user.name + ')\2') }}
+        {% for line in info_2fa.stdout_lines[1:] %}
+        {{ line }}
+        {% endfor %}
+  when:
+    - enable_2fa
+    - info_2fa.changed
+    - ansible_distribution_release == 'xenial'
+  tags:
+  - create_users
+  - openvpn_users
+  - 2fa
+
+- name: VPN | Client config creation | Ensure 2fa info for user
+  become: yes
+  become_user: root
+  copy:
+    dest: "{{ client_2fa_dir_path }}/{{ user.name }}.2fa_info"
+    content: |
+      These are values to ensure your 2FA settings for given OpenVPN config file:
+      {{ info_2fa.stdout }}
+  when:
+    - enable_2fa
+    - info_2fa.changed
+    - ansible_distribution_release != 'xenial'
+  tags:
+  - create_users
+  - openvpn_users
+  - 2fa
+
+- name: VPN | Client config creation | Fetch client config to localhost
+  fetch:
+    src: "{{ client_2fa_dir_path }}/{{ user.name }}.2fa_info"
+    dest: /tmp/{{ cert_prefix }}{{ user.name }}.2fa_info
+    flat: yes
+  when: info_2fa.changed
+  tags:
+  - create_users
+  - openvpn_users
+  - 2fa
+
+- name: VPN | Client config creation | Ensure proper permissions on the 2fa files
+  file:
+    path: "{{ item }}"
+    owner: root
+    group: root
+    mode: 0400
+  when: enable_2fa
+  with_items:
+    - "{{ client_2fa_dir_path }}/{{ user.name }}"
+    - "{{ client_2fa_dir_path }}/{{ user.name }}.2fa_info"
+  tags:
+  - create_users
+  - openvpn_users
+  - 2fa
+
 - name: VPN | Client config creation | Send config to user email
   mail:
     host: "{{ mail.host }}"

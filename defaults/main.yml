@@ -110,3 +110,6 @@ ldap_config:
   client_name_attribute: 'sAMAccountName'
   client_email_attribute: 'userPrincipalName'
 use_ldap: False
+enable_2fa: False
+client_2fa_dir_path: /etc/openvpn/client_2fa
+client_2fa_server_description: "{{ server_name }}"

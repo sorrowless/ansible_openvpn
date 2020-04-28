@@ -45,3 +45,14 @@
   when: iptables_configure
   tags:
     - iptables
+
+- name: VPN | Configuration | Ensure pam configuration for 2fa
+  template:
+    src: openvpn.2fa
+    dest: /etc/pam.d/openvpn
+    owner: root
+    group: root
+    mode: 0644
+  when: enable_2fa
+  tags:
+    - 2fa
