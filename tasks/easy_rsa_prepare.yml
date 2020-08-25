@@ -9,6 +9,16 @@
     src: /etc/openvpn/easy-rsa/openssl-1.0.0.cnf
     dest: /etc/openvpn/easy-rsa/openssl.cnf
     state: link
+  when:
+    - ansible_distribution_release|lower != 'focal'
+
+- name: VPN | Configuration | Create link to openssl config
+  file:
+    src: /etc/openvpn/easy-rsa/openssl-easyrsa.cnf
+    dest: /etc/openvpn/easy-rsa/openssl.cnf
+    state: link
+  when:
+    - ansible_distribution_release|lower == 'focal'
 
 - name: VPN | Configuration | Change default CRL list time
   lineinfile:

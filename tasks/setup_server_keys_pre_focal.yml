@@ -1,0 +1,37 @@
+---
+- name: VPN | Keys creation | Link easy-rsa openssl.conf to needed place
+  file:
+    src: /etc/openvpn/easy-rsa/openssl-1.0.0.cnf
+    dest: /etc/openvpn/easy-rsa/openssl.cnf
+    state: link
+
+- name: VPN | Keys creation | Create CA keypair
+  shell: ". ./vars ; ./clean-all ; ./build-ca --batch {{ server_name }}"
+  args:
+    chdir: /etc/openvpn/easy-rsa
+    creates: /etc/openvpn/easy-rsa/keys/ca.key
+
+- name: VPN | Keys creation | Create server keypair
+  shell: ". ./vars ; ./build-key-server --batch {{ server_name }}"
+  args:
+    chdir: /etc/openvpn/easy-rsa
+    creates: "/etc/openvpn/easy-rsa/keys/{{ server_name }}.key"
+
+- name: VPN | Keys creation | Create Diffie-Hellman params
+  shell: ". ./vars ; ./build-dh"
+  args:
+    chdir: /etc/openvpn/easy-rsa
+    creates: "/etc/openvpn/easy-rsa/keys/dh2048.pem"
+
+- name: VPN | Keys installation | Copy needed keys to target dir
+  file:
+    src: /etc/openvpn/easy-rsa/keys/{{ item }}
+    dest: /etc/openvpn/server_keys/{{ item }}
+    state: link
+    force: yes
+  with_items:
+    - ca.crt
+    - "{{ server_name }}.crt"
+    - "{{ server_name }}.key"
+    - crl.pem
+    - dh2048.pem

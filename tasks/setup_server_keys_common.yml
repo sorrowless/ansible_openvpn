@@ -1,0 +1,21 @@
+---
+- name: VPN | Keys creation | Create keys directory
+  file:
+    path: /etc/openvpn/server_keys
+    state: directory
+
+- name: VPN | Import pre-focal tasks
+  import_tasks: setup_server_keys_pre_focal.yml
+  when:
+    - ansible_distribution_release|lower != 'focal'
+
+- name: VPN | Import focal tasks
+  import_tasks: setup_server_keys_focal.yml
+  when:
+    - ansible_distribution_release|lower == 'focal'
+
+- name: VPN | Keys creation | Create tls-auth key
+  command: openvpn --genkey --secret ta.key
+  args:
+    chdir: /etc/openvpn/server_keys
+    creates: /etc/openvpn/server_keys/ta.key

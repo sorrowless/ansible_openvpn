@@ -16,7 +16,7 @@
   tags: ['system_prepare']
 
 - name: VPN | Keys creation | Generate server keys
-  import_tasks: setup_server_keys.yml
+  import_tasks: setup_server_keys_common.yml
   tags: ['server_keys']
 
 - name: VPN | Users | Get users list

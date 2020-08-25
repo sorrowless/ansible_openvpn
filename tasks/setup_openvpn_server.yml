@@ -15,17 +15,6 @@
   package:
     name: openvpn
     state: present
-  when: ansible_distribution_version == '16.04'
-  register: task_result
-  until: task_result is success
-  retries: 10
-  delay: 2
-
-- name: VPN | Installation | Install latest version of OpenVPN server
-  package:
-    name: openvpn
-    state: present
-  when: ansible_distribution_version == '18.04'
   register: task_result
   until: task_result is success
   retries: 10

@@ -1,0 +1,65 @@
+---
+- name: VPN | Configuration | Create link to openssl config
+  file:
+    src: /etc/openvpn/easy-rsa/openssl-easyrsa.cnf
+    dest: /etc/openvpn/easy-rsa/openssl.cnf
+    state: link
+
+- name: VPN | Keys creation | Create CA keypair
+  shell: "./easyrsa init-pki ; ./easyrsa --batch build-ca nopass"
+  args:
+    chdir: /etc/openvpn/easy-rsa
+    creates: /etc/openvpn/easy-rsa/pki/private/ca.key
+
+- name: VPN | Keys creation | Create server keypair
+  shell: "./easyrsa --batch build-server-full {{ server_name }} nopass"
+  args:
+    chdir: /etc/openvpn/easy-rsa
+    creates: "/etc/openvpn/easy-rsa/pki/private/{{ server_name }}.key"
+
+- name: VPN | Keys creation | Create Diffie-Hellman params
+  shell: "./easyrsa gen-dh"
+  args:
+    chdir: /etc/openvpn/easy-rsa
+    creates: "/etc/openvpn/easy-rsa/pki/dh.pem"
+
+- name: VPN | Keys installation | Copy needed keys to target dir
+  become: yes
+  become_user: root
+  file:
+    src: /etc/openvpn/easy-rsa/pki/{{ item }}
+    dest: /etc/openvpn/server_keys/{{ item }}
+    state: link
+    force: yes
+  with_items:
+    - ca.crt
+    - crl.pem
+
+- name: VPN | Keys installation | Copy needed keys to target dir
+  become: yes
+  become_user: root
+  file:
+    src: /etc/openvpn/easy-rsa/pki/issued/{{ item }}
+    dest: /etc/openvpn/server_keys/{{ item }}
+    state: link
+    force: yes
+  with_items:
+    - "{{ server_name }}.crt"
+
+- name: VPN | Keys installation | Copy needed keys to target dir
+  become: yes
+  become_user: root
+  file:
+    src: /etc/openvpn/easy-rsa/pki/private/{{ item }}
+    dest: /etc/openvpn/server_keys/{{ item }}
+    state: link
+    force: yes
+  with_items:
+    - "{{ server_name }}.key"
+
+- name: VPN | Keys installation | Copy needed keys to target dir
+  file:
+    src: /etc/openvpn/easy-rsa/pki/dh.pem
+    dest: /etc/openvpn/server_keys/dh2048.pem
+    state: link
+    force: yes
