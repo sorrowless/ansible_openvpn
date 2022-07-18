@@ -1,0 +1,15 @@
+---
+- name: VPN | Configuration | Import exact release easy-rsa tasks
+  include_tasks: "easy_rsa_prepare_{{ ansible_distribution_release|lower }}.yml"
+  
+- name: VPN | Configuration | Change default CRL list time
+  lineinfile:
+    path: /etc/openvpn/easy-rsa/openssl.cnf
+    regexp: '^default_crl_days'
+    line: 'default_crl_days=3650'
+    insertafter: '^default_days'
+
+- name: VPN | Configuration | Create keys dir
+  file:
+    path: /etc/openvpn/easy-rsa/keys
+    state: directory

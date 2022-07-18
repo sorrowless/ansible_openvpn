@@ -8,7 +8,7 @@
   tags: ['openvpn_config']
 
 - name: VPN | Installation | Prepare easy-rsa scripts
-  import_tasks: easy_rsa_prepare.yml
+  import_tasks: easy_rsa_prepare_common.yml
   tags: ['easy_rsa_prepare']
 
 - name: VPN | Installation | Prepare system to be ready to be OpenVPN server

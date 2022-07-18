@@ -1,0 +1,16 @@
+---
+- name: VPN | Configuration | Copy easy-rsa scripts
+  command: "rsync -avi /usr/share/easy-rsa /etc/openvpn"
+  args:
+    creates: /etc/openvpn/easy-rsa/easyrsa
+
+- name: VPN | Configuration | Create link to openssl config
+  file:
+    src: /etc/openvpn/easy-rsa/openssl-easyrsa.cnf
+    dest: /etc/openvpn/easy-rsa/openssl.cnf
+    state: link
+
+- name: VPN | Configuration | Create easy-rsa vars
+  template:
+    src: easy_rsa_vars.focal
+    dest: /etc/openvpn/easy-rsa/vars
