@@ -29,6 +29,17 @@
   tags:
     - iptables
 
+- name: VPN | Configuration | Allow iptables forward
+  iptables:
+    table: filter
+    chain: FORWARD
+    source: "{{ vpn_network }}/{{ vpn_cidr }}"
+    jump: ACCEPT
+  become: yes
+  when: iptables_configure
+  tags:
+    - iptables
+
 - name: VPN | Configuration | Allow iptables postrouting
   iptables:
     table: nat
