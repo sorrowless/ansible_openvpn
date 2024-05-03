@@ -7,26 +7,39 @@
     - create_users
     - openvpn_users
 
+- name: VPN | Key creation | Set vars
+  ansible.builtin.set_fact:
+    client_key_path: /etc/openvpn/easy-rsa/keys/{{ user.name }}.key
+    client_crt_path: /etc/openvpn/easy-rsa/keys/{{ user.name }}.crt
+    arg_creates: "/etc/openvpn/easy-rsa/keys/{{ user.name }}.crt"
+    cert_gen_shell: ". ./vars ; ./build-key --batch {{ user.name }}"
+  when:
+    - ansible_distribution_release|lower in ['xenial', 'bionic']
+  tags:
+    - create_users
+    - openvpn_users
+
+- name: VPN | Key creation | Set vars
+  ansible.builtin.set_fact:
+    client_key_path: /etc/openvpn/easy-rsa/pki/private/{{ user.name }}.key
+    client_crt_path: /etc/openvpn/easy-rsa/pki/issued/{{ user.name }}.crt
+    arg_creates: "/etc/openvpn/easy-rsa/pki/private/{{ user.name }}.key"
+    cert_gen_shell: "./easyrsa --batch build-client-full {{ user.name }} nopass"
+  when:
+    - ansible_distribution_release|lower in ['focal', 'jammy']
+  tags:
+    - create_users
+    - openvpn_users
+
 - name: VPN | Keys creation | Generate client certificates
-  shell: ". ./vars ; ./build-key --batch {{ user.name }}"
+  shell: "{{ cert_gen_shell }}"
   args:
     chdir: /etc/openvpn/easy-rsa
-    creates: "/etc/openvpn/easy-rsa/keys/{{ user.name }}.crt"
+    creates: "{{ arg_creates }}"
   register: user_cert
   tags:
     - create_users
     - openvpn_users
-  when:
-    - ansible_distribution_release|lower in ['xenial', 'bionic']
-
-- name: VPN | Keys creation | Generate client certificates
-  shell: "./easyrsa --batch build-client-full {{ user.name }} nopass"
-  register: user_cert
-  args:
-    chdir: /etc/openvpn/easy-rsa
-    creates: "/etc/openvpn/easy-rsa/pki/private/{{ user.name }}.key"
-  when:
-    - ansible_distribution_release|lower in ['focal', 'jammy']
 
 - name: VPN | Client config creation | Ensure user ccd file from ip-info block
   copy:
@@ -70,43 +83,19 @@
 
 - name: VPN | Client config creation | Register client cert
   slurp:
-    src: "/etc/openvpn/easy-rsa/keys/{{ user.name }}.crt"
+    src: "{{ client_crt_path }}"
   register: client_cert
   tags:
     - create_users
     - openvpn_users
-  when:
-    - ansible_distribution_release|lower in ['xenial', 'bionic']
-
-- name: VPN | Client config creation | Register client cert
-  slurp:
-    src: "/etc/openvpn/easy-rsa/pki/issued/{{ user.name }}.crt"
-  register: client_cert
-  tags:
-    - create_users
-    - openvpn_users
-  when:
-    - ansible_distribution_release|lower in ['focal', 'jammy']
 
 - name: VPN | Client config creation | Register client key
   slurp:
-    src: "/etc/openvpn/easy-rsa/keys/{{ user.name }}.key"
+    src: "{{ client_key_path }}"
   register: client_key
   tags:
     - create_users
     - openvpn_users
-  when:
-    - ansible_distribution_release|lower in ['xenial', 'bionic']
-
-- name: VPN | Client config creation | Register client key
-  slurp:
-    src: "/etc/openvpn/easy-rsa/pki/private/{{ user.name }}.key"
-  register: client_key
-  tags:
-    - create_users
-    - openvpn_users
-  when:
-    - ansible_distribution_release|lower in ['focal', 'jammy']
 
 - name: VPN | Client config creation | Generate client config
   template:
@@ -129,35 +118,23 @@
     - create_users
     - openvpn_users
 
-- name: VPN | Client config creation | Ensure user 2fa configuration
-  become: yes
-  become_user: root
-  shell:
-    cmd: |
-      google-authenticator -t -s {{ user.name }} -f -Q UTF8 -d -w 1 -r 3 -R 30
-    creates: "{{ client_2fa_dir_path }}/{{ user.name }}"
-  register: info_2fa
+- name: VPN | Key creation | Set var google_auth_add_args
+  ansible.builtin.set_fact:
+    google_auth_add_args:  "-l {{ user.name }} -i {{ client_2fa_server_description }}"
   when:
     - enable_2fa
-    - ansible_distribution_release == 'xenial'
-  args:
-    chdir: "{{ client_2fa_dir_path }}"
-  tags:
-  - create_users
-  - openvpn_users
-  - 2fa
+    - ansible_distribution_release != 'xenial'
 
 - name: VPN | Client config creation | Ensure user 2fa configuration
   become: yes
   become_user: root
   shell:
     cmd: |
-      google-authenticator -t -s {{ user.name }} -f -Q UTF8 -d -w 1 -r 3 -R 30 -l {{ user.name }} -i "{{ client_2fa_server_description }}"
+      google-authenticator -t -s {{ user.name }} -f -Q UTF8 -d -w 1 -r 3 -R 30 {{ google_auth_add_args | default("") }}
     creates: "{{ client_2fa_dir_path }}/{{ user.name }}"
   register: info_2fa
   when:
     - enable_2fa
-    - ansible_distribution_release != 'xenial'
   args:
     chdir: "{{ client_2fa_dir_path }}"
   tags:
