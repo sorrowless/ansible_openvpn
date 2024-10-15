@@ -12,7 +12,7 @@
   args:
     chdir: /etc/openvpn/easy-rsa
     creates: "/etc/openvpn/easy-rsa/keys/{{ user.name }}.crt"
-  register: user_cert
+  register: user_cert_bionic
   tags:
     - create_users
     - openvpn_users
@@ -21,7 +21,7 @@
 
 - name: VPN | Keys creation | Generate client certificates
   shell: "./easyrsa --batch build-client-full {{ user.name }} nopass"
-  register: user_cert
+  register: user_cert_focal
   args:
     chdir: /etc/openvpn/easy-rsa
     creates: "/etc/openvpn/easy-rsa/pki/private/{{ user.name }}.key"
@@ -71,7 +71,7 @@
 - name: VPN | Client config creation | Register client cert
   slurp:
     src: "/etc/openvpn/easy-rsa/keys/{{ user.name }}.crt"
-  register: client_cert
+  register: client_cert_bionic
   tags:
     - create_users
     - openvpn_users
@@ -81,17 +81,21 @@
 - name: VPN | Client config creation | Register client cert
   slurp:
     src: "/etc/openvpn/easy-rsa/pki/issued/{{ user.name }}.crt"
-  register: client_cert
+  register: client_cert_focal
   tags:
     - create_users
     - openvpn_users
   when:
     - ansible_distribution_release|lower in ['focal', 'jammy']
 
+- name: VPN | Register final client cert
+  set_fact:
+    client_cert: "{% if client_cert_bionic.skipped|default(false) %}{{ client_cert_focal }}{% else %}{{ client_cert_bionic }}{% endif %}"
+
 - name: VPN | Client config creation | Register client key
   slurp:
     src: "/etc/openvpn/easy-rsa/keys/{{ user.name }}.key"
-  register: client_key
+  register: client_key_bionic
   tags:
     - create_users
     - openvpn_users
@@ -101,12 +105,16 @@
 - name: VPN | Client config creation | Register client key
   slurp:
     src: "/etc/openvpn/easy-rsa/pki/private/{{ user.name }}.key"
-  register: client_key
+  register: client_key_focal
   tags:
     - create_users
     - openvpn_users
   when:
     - ansible_distribution_release|lower in ['focal', 'jammy']
+
+- name: VPN | Register final client key
+  set_fact:
+    client_key: "{% if client_key_bionic.skipped|default(false) %}{{ client_key_focal }}{% else %}{{ client_key_bionic }}{% endif %}"
 
 - name: VPN | Client config creation | Generate client config
   template:
@@ -124,7 +132,7 @@
     src: /etc/openvpn/client_keys/{{ user.name }}/{{ user.name }}.ovpn
     dest: /tmp/{{ cert_prefix }}{{ user.name }}.ovpn
     flat: yes
-  when: user_cert.changed
+  when: user_cert_bionic.changed or user_cert_focal.changed
   tags:
     - create_users
     - openvpn_users
@@ -240,7 +248,7 @@
     subject: "{{ mail.subject }}"
     body: "{{ mail.body }}"
     attach: ["/etc/openvpn/client_keys/{{ user.name }}/{{ user.name }}.ovpn"]
-  when: user.email is defined and mail.host is defined and user_cert.changed
+  when: user.email is defined and mail.host is defined and (user_cert_bionic.changed or user_cert_focal.changed)
   failed_when: False
   tags:
     - create_users
